@@ -335,6 +335,8 @@ function mainGame() {
       playerPosition = gotSnake(playerPosition, diceOutcome);
       playerPosition = gotLadder(playerPosition, diceOutcome);
 
+      position = 1;
+
       if (playerPosition === 100) {
         console.log('🎉Congrats! You won!');
 
