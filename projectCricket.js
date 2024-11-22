@@ -1,5 +1,7 @@
 let teamBotScore = 0;
 let yourTeamScore = 0;
+const limitOfOvers = 2;
+const limitOfWickets = 5;
 
 function toss() {
   const HEAD = 1;
@@ -7,7 +9,7 @@ function toss() {
   let didYouWin = 0;
 
   confirm("Are you excited for the TOSS");
-  const doYouChooseHead = confirm("Do you want head");
+  const doYouChooseHead = confirm("Do you want head?");
 
   if (doYouChooseHead) {
     didYouWin = Math.ceil(Math.random() * 2) === HEAD;
@@ -40,7 +42,6 @@ function toss() {
 
   console.log("BOT won the toss, will bowl first");
   return "botBowl";
-
 }
 
 function wait(times) {
@@ -65,6 +66,17 @@ function ballResult(bowltype, shotType) {
     }
   }
   return 0;
+}
+
+function getWicket(bowlType, shotType) {
+  switch (bowlType) {
+    case 1:
+    case 4:
+      return shotType === 2 ? 1 : 0;
+    case 2:
+    case 3:
+      return shotType === 1 ? 1 : 0;
+  }
 }
 
 function isLBW(shotType, bowlType) {
@@ -117,12 +129,105 @@ function getShotType(shotType) {
   }
 }
 
+function battingInstruction() {
+  const bowlingOptions = "THE SHOTS OPTIONS ARE FOLLOWING ⤵️ \n";
+  const firstOpt = " 🏏 1 for DEFENCE \n";
+  const secondOpt = "🏏 2 for PULL \n";
+  const thirdOpt = "🏏 3 for COVER DRIVE \n";
+  const fourthOpt = "🏏 4 for FLICK \n";
+
+  return bowlingOptions + firstOpt + secondOpt + thirdOpt + fourthOpt;
+}
+
+function doChasing(teamBotScore) {
+  let wicket = 0;
+  let over = 0;
+  let ballsLeft = limitOfOvers * 6;
+
+  console.log("You have to chase " + (++teamBotScore) + " in " + limitOfOvers);
+
+  while (over < limitOfOvers && wicket < limitOfWickets) {
+    for (let ball = 1; ball <= 6; ball++) {
+      console.clear();
+      console.log("need " + (teamBotScore - yourTeamScore) + " in " + --ballsLeft + " balls\n");
+
+      console.log(battingInstruction());
+
+      const bowlType = Math.ceil(Math.random() * 4);
+      const shotType = +prompt("Choose one of them to attack the Ball");
+
+
+      console.log("Batsman is ready to hit....");
+
+      wait(6);
+
+      console.log("BOT bowled a " + getTheBowlType(bowlType));
+
+      console.log("You plays a " + getShotType(shotType));
+
+      yourTeamScore += ballResult(bowlType, shotType);
+      wicket += getWicket(bowlType, shotType);
+
+      if (isLBW(shotType, bowlType)) {
+        wicket += 1;
+      }
+
+      console.log("RCB ", yourTeamScore, "-", wicket, "(over " + over + "." + ball + ")");
+
+
+    }
+
+    over++;
+  }
+  console.log("RCB ", yourTeamScore, "-", wicket);
+}
+
+function doBattingFirst() {
+  let wicket = 0;
+  let over = 0;
+
+  while (over < limitOfOvers && wicket < limitOfWickets) {
+    for (let ball = 1; ball <= 6; ball++) {
+      console.clear();
+      console.log(battingInstruction());
+
+      const bowlType = Math.ceil(Math.random() * 4);
+
+
+      const shotType = +prompt("Choose one of them to attack the Ball");
+
+      console.log("Batsman is ready to hit....");
+
+      wait(6);
+
+      console.log("BOT bowled a " + getTheBowlType(bowlType));
+
+      console.log("You plays a " + getShotType(shotType));
+
+      yourTeamScore += ballResult(bowlType, shotType);
+      wicket += getWicket(bowlType, shotType);
+
+      if (isLBW(shotType, bowlType)) {
+        wicket += 1;
+      }
+
+      console.log("RCB ", yourTeamScore, "-", wicket, "(over " + over + "." + ball + ")");
+
+    }
+
+    over++;
+  }
+  console.log("RCB ", yourTeamScore, "-", wicket);
+
+}
+
 function doBowlingFirst() {
   let wicket = 0;
   let over = 0;
 
-  while (over < 1 && wicket !== 5) {
+  while (over < limitOfOvers && wicket < limitOfWickets) {
     for (let ball = 1; ball <= 6; ball++) {
+      console.clear();
       console.log("THE BOWLING OPTIONS ARE FOLLOWING ⤵️");
       console.log(" 🎾 1 for YORKER \n 🎾 2 for BOUNCER \n 🎾 3 for OUTSWING \n 🎾 4 for INSWING");
 
@@ -136,20 +241,24 @@ function doBowlingFirst() {
       const shotType = Math.ceil(Math.random() * 4);
 
       console.log("BOT plays a " + getShotType(shotType));
-      
+
       teamBotScore += ballResult(bowlType, shotType);
+      wicket += getWicket(bowlType, shotType);
 
       if (isLBW(shotType, bowlType)) {
         wicket += 1;
-        break;
       }
 
+      // prompt("press enter for continue");
+      // console.clear();
       console.log("BOT ", teamBotScore, "-", wicket, "(over " + over + "." + ball + ")");
-
     }
 
     over++;
   }
+
+  console.log("BOT ", teamBotScore, "-", wicket);
+
   const result = doChasing(teamBotScore);
 
   return result;
@@ -157,7 +266,7 @@ function doBowlingFirst() {
 
 function startGame() {
   const tossResult = toss();
-  const matchResult = "";
+  let matchResult = "";
 
   switch (tossResult) {
     case "botBat":
@@ -173,5 +282,3 @@ function startGame() {
 }
 
 startGame();
-
-
